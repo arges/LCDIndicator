@@ -17,7 +17,7 @@ setup(name='LCDIndicator',
         'LCDIndicator': ['data/*.html', 'data/*.css'],
       },
       exclude_package_data = { '': ['README.md'] },
-      scripts = ['bin/display-count'],
+      scripts = ['./display-count'],
       
       keywords='python hardware',
       license='GPLv2',
