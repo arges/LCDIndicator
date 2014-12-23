@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+from LCDIndicator.Email import Email
+from LCDIndicator.AdafruitUSBBackpackLCD import AdafruitUSBBackpackLCD
+from time import sleep
+import configparser
+import datetime
+import keyring
+import sys
+
+def get_color(num, thresholds):
+    if num < thresholds[0]:
+        return [0,0x0f,0] # GREEN
+    elif num < thresholds[1]:
+        return [0x0f,0x0f,0x00] # YELLOW
+    else:
+        return [0x0f,0,0] # RED
+
+def main(args=None):
+    conffile = args[1]
+
+    """ Read configuration file """
+    config = configparser.ConfigParser()
+    rc = config.read(conffile)
+    if not rc:
+        print("Configuration file not found.")
+        exit()
+
+    """ Read email parameters """
+    username = config.get('global','username')
+    password = config.get('global','password')
+    if password == 'keyring':
+        password = keyring.get_password("system", username)
+        if password is None:
+            password = raw_input("Enter your password for %s: " % username)
+            keyring.set_password("system", username, password)
+
+    server = config.get('global','server')
+    port = int(config.get('global','port'))
+    interval = int(config.get('global','interval'))
+    thresholds = [int(e.strip()) for e in 
+        config.get('global','thresholds').split(',')]
+
+    """ Log into email """
+    email = Email(server, port)
+    try:
+        email.login(username, password)
+    except:
+        print("Couldn't log into email")
+        exit()
+
+    """ Start the display """
+    try:
+        display = AdafruitUSBBackpackLCD()
+    except:
+        print "Display not found."
+        exit()
+
+    """ Display count in loop """
+    while True:
+        count = email.get_unread_count()
+        color = get_color(count, thresholds)
+        time = datetime.datetime.now().strftime("%h-%m %I:%M %p")
+        display.background(color[0],color[1],color[2])
+        display.home()
+        display.write("%s unread\r" % count)
+        display.write("%s" % time)
+        sleep(interval)
+
+if __name__ == "__main__":
+    main(sys.argv)
+
