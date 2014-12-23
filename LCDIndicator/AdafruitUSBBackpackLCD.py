@@ -1,7 +1,8 @@
 import serial
+import platform
 
 class AdafruitUSBBackpackLCD:
-    def __init__(self, port='/dev/ttyACM0'):
+    def __init__(self, port):
         self.serial = serial.Serial(port, 9600, timeout=5)
         self.red = 0x0f
         self.green = 0x0f
