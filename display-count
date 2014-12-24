@@ -67,7 +67,7 @@ def main(args=None):
     while True:
         count = email.get_unread_count()
         color = get_color(count, thresholds)
-        time = datetime.datetime.now().strftime("%h-%m %I:%M %p")
+        time = datetime.datetime.now().strftime("%m/%d %I:%M %p")
         display.background(color[0],color[1],color[2])
         display.home()
         display.write("%s unread\r" % count)
